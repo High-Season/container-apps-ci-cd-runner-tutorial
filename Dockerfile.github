@@ -3,14 +3,23 @@ FROM ghcr.io/actions/actions-runner:2.304.0
 
 USER root
 
-# install curl and jq
-RUN apt-get update && apt-get install -y curl jq && \
-    apt-get clean && \
+# Install curl, jq, and Azure CLI
+RUN apt-get update && apt-get install -y \
+    curl \
+    jq \
+    ca-certificates \
+    apt-transport-https \
+    lsb-release \
+    gnupg \
+    && curl -sL https://aka.ms/InstallAzureCLIDeb | bash \
+    && apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Copy and set entrypoint permissions
 COPY github-actions-runner/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
 
+# Switch back to non-root user
 USER runner
 
 ENTRYPOINT ["./entrypoint.sh"]
